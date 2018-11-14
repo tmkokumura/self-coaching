@@ -1,0 +1,15 @@
+DELETE FROM question_types;
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (1, 'テーマを決める質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (2, '状況を把握する質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (3, 'ゴールを決める質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (4, '質問を思いつかない時の質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (5, 'キーワードを広げる質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (6, '最高の瞬間を聴く質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (7, '体験して深める質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (8, '視点を変える質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (9, 'サボタージュを見る質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (10, 'サボタージュに対処する質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (11, '想いを深める質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (12, '可能性を広げる質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (13, '行動を促す質問');
+INSERT INTO question_types (question_type_id, question_type_name) VALUES (14, '宿題を依頼する質問');

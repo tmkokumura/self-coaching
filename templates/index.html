@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <title>Self Coaching</title>
+    <link rel="stylesheet" href="/static/css/index.css">
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="/static/js/index.js"></script>
+</head>
+<body>
+    <div>
+        <p>コーチ</p>
+        <p>{{question_text}}</p>
+    </div>
+    <div>
+        <p>あなた</p>
+        <textarea id="answer_text"></textarea>
+    </div>
+    <input type="hidden" id="question_id" value="{{question_id}}">
+    <input type="hidden" id="prev_answer_hist_id" value="{{prev_answer_hist_id}}">
+    <div>
+        <button type="button" id="change" disabled>質問を変える</button>
+        <button type="button" id="answer">回答する</button>
+    </div>
+    <p id="msg"></p>
+</body>
+</html>
