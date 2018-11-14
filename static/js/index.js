@@ -1,20 +1,22 @@
 $(function() {
     /* 質問を変えるボタン押下時 */
     $('#change').click(function(){
-        activate();
         change();
+        reset();
     });
 
     /* 回答するボタン押下時 */
     $('#answer').click(function(){
-        activate();
         answer();
+        reset();
     });
 })
 
-/* 質問を変えるボタン活性化 */
-function activate() {
+/* 画面リセット */
+function reset() {
+    $('#msg').html('');
     $('#change').prop('disabled', false);
+    $('#answer_text').val('');
 }
 
 /* changeメソッドajax呼び出し */
@@ -23,14 +25,12 @@ function change() {
         url:'change',
         type:'POST',
         data:{
-            'prev_answer_hist_id': $('#prev_answer_hist_id').val(),
-            'question_id': $('#question_id').val()
+            'question_hist_id': $('#question_hist_id').val()
         }
     })
     .done(function(res){
-        $('#question_id').val(res.question_id);
+        $('#question_hist_id').val(res.question_hist_id);
         $('#question_text').html(res.question_text);
-        $('#prev_answer_hist_id').val(res.prev_answer_hist_id);
     })
     .error(function(){
         $('#msg').html('システムエラーが発生しました。');
@@ -43,15 +43,13 @@ function answer() {
         url:'answer',
         type:'POST',
         data:{
-            'prev_answer_hist_id': $('#prev_answer_hist_id').val(),
-            'question_id': $('#question_id').val(),
+            'question_hist_id': $('#question_hist_id').val(),
             'answer_text': $('#answer_text').val()
         }
     })
     .done(function(res){
-        $('#question_id').val(res.question_id);
+        $('#question_hist_id').val(res.question_hist_id);
         $('#question_text').html(res.question_text);
-        $('#prev_answer_hist_id').val(res.prev_answer_hist_id);
     })
     .error(function(){
         $('#msg').html('システムエラーが発生しました。');

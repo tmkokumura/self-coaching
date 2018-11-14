@@ -10,8 +10,8 @@ LOG_FORMAT = '%(asctime)s %(levelname)s %(pathname)s %(funcName)s :%(message)s'
 
 
 # accept flag
-ACCEPT_FLAG_ON = 1
-ACCEPT_FLAG_OFF = 0
+ANSWER_TYPE_ANSWER = 1  # 回答した
+ANSWER_TYPE_CHANGE = 2  # 質問を変えた
 
 
 # format

@@ -12,14 +12,13 @@
 <body>
     <div>
         <p>コーチ</p>
-        <p>{{question_text}}</p>
+        <p id="question_text">{{question_text}}</p>
+        <input type="hidden" id="question_hist_id" value="{{question_hist_id}}">
     </div>
     <div>
         <p>あなた</p>
         <textarea id="answer_text"></textarea>
     </div>
-    <input type="hidden" id="question_id" value="{{question_id}}">
-    <input type="hidden" id="prev_answer_hist_id" value="{{prev_answer_hist_id}}">
     <div>
         <button type="button" id="change" disabled>質問を変える</button>
         <button type="button" id="answer">回答する</button>

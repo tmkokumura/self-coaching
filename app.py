@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, make_response
 from contextlib import closing
 from datetime import datetime
 import sqlite3
+import random
 import consts
 import sql
 import logging
@@ -20,34 +21,51 @@ def index():
     """
     logging.info('--- Start [index()] ---')
 
-    question_id, question_text = select_question(1)
+    # 最初の質問を取得する
+    question_id = 1
+    question_text = select_question(question_id)
 
+    # 質問履歴を登録
+    question_hist_id = insert_question_hist(question_id)
+
+    logging.info(
+        'question_hist_id={}, question_id={}, question_test={}'.format(question_hist_id, question_id, question_text))
     logging.info('--- End [index()] ---')
 
-    return render_template('index.html', question_id=question_id, question_text=question_text)
+    return render_template('index.html', question_hist_id=question_hist_id, question_text=question_text)
 
 
 @app.route('/answer', methods=['POST'])
 def answer():
+    """
+    回答するボタン押下時
+    :return:
+    """
     logging.info('--- Start [answer()] ---')
 
-    prev_answer_hist_id = request.form.get('prev_answer_hist_id')
-    question_id = request.form.get('question_id')
-    answer_text = request.form.get('answer')
-    logging.info('prev_answer_hist_id: {}'.format(prev_answer_hist_id))
-    logging.info('question_id: {}'.format(question_id))
+    question_hist_id = request.form.get('question_hist_id')
+    answer_text = request.form.get('answer_text')
+    logging.info('question_hist_id: {}'.format(question_hist_id))
     logging.info('answer_text: {}'.format(answer_text))
 
-    if prev_answer_hist_id is None:
-        insert_question_hist(question_id, consts.ACCEPT_FLAG_ON)
-    else:
-        insert_question_hist(question_id, consts.ACCEPT_FLAG_ON, prev_answer_hist_id=prev_answer_hist_id)
+    # 回答履歴を登録
+    insert_answer_hist(question_hist_id, consts.ANSWER_TYPE_ANSWER, answer_text=answer_text)
 
-    insert_answer_hist(question_id, answer_text)
-    question_id, question_text = select_question(1)
+    # 次の質問を取得
+    next_question_id = get_next_question_id()
+    next_question_text = select_question(next_question_id)
 
-    res = {'question_id': question_id, 'question_text': question_text, 'prev_answer_hist_id': prev_answer_hist_id}
+    # 質問履歴を登録
+    next_question_hist_id = insert_question_hist(next_question_id, prev_question_hist_id=question_hist_id)
 
+    res = {
+        'question_hist_id': next_question_hist_id,
+        'question_text': next_question_text
+    }
+
+    logging.info(
+        'question_hist_id={}, question_id={}, question_test={}'.format(next_question_hist_id, next_question_id,
+                                                                       next_question_text))
     logging.info('--- End [answer()] ---')
 
     return make_response(jsonify(res))
@@ -55,47 +73,72 @@ def answer():
 
 @app.route('/change', methods=['POST'])
 def change():
+    """
+    質問を変えるボタン押下時
+    :return:
+    """
     logging.info('--- Start [change()] ---')
 
-    prev_answer_hist_id = request.form.get('prev_answer_hist_id')
-    question_id = request.form.get('question_id')
-    logging.info('prev_answer_hist_id: {}'.format(prev_answer_hist_id))
-    logging.info('question_id: {}'.format(question_id))
+    question_hist_id = request.form.get('question_hist_id')
+    logging.info('question_hist_id: {}'.format(question_hist_id))
 
-    insert_question_hist(question_id, consts.ACCEPT_FLAG_OFF, prev_answer_hist_id=prev_answer_hist_id)
-    question_id, question_text = select_question(1)
+    # 回答履歴を登録
+    insert_answer_hist(question_hist_id, consts.ANSWER_TYPE_CHANGE)
 
-    res = {'question_id': question_id, 'question_text': question_text, 'prev_answer_hist_id': prev_answer_hist_id}
+    # 次の質問を取得
+    next_question_id = get_next_question_id()
+    next_question_text = select_question(next_question_id)
 
+    # 質問履歴を登録
+    next_question_hist_id = insert_question_hist(next_question_id, prev_question_hist_id=question_hist_id)
+
+    res = {
+        'question_hist_id': next_question_hist_id,
+        'question_text': next_question_text
+    }
+
+    logging.info(
+        'question_hist_id={}, question_id={}, question_test={}'.format(next_question_hist_id, next_question_id,
+                                                                       next_question_text))
     logging.info('--- End [change()] ---')
 
     return make_response(jsonify(res))
+
+
+# 次の質問IDを決定する
+def get_next_question_id():
+    record = select(sql.S_MIN_MIX_QUESTION_ID)
+    min_question_id = record[0][0]
+    max_question_id = record[0][1]
+    return random.randrange(min_question_id, max_question_id - 1)
 
 
 # 質問を取得する
 def select_question(question_id):
     params = (question_id,)
     record = select(sql.S_QUESTION, params)
-    return record[0][0], record[0][1]
+    return record[0][0]
 
 
 # 質問履歴を登録する
-def insert_question_hist(question_id, accept_flag, prev_answer_hists_id=None):
-    params = (question_id, accept_flag, prev_answer_hists_id, format_date(datetime.now()))
+def insert_question_hist(question_id, prev_question_hist_id=None):
+    params = (question_id, prev_question_hist_id, format_date(datetime.now()))
     insert(sql.I_QUESTION_HIST, params)
+    record = select(sql.S_MAX_QUESTION_HIST_ID)
+    return record[0][0]
 
 
 # 回答履歴を登録する
-def insert_answer_hist(question_id, answer_text):
-    params = (question_id, answer_text, format_date(datetime.now()))
+def insert_answer_hist(question_hist_id, answer_type, answer_text=None):
+    params = (question_hist_id, answer_type, answer_text, format_date(datetime.now()))
     insert(sql.I_ANSWER_HIST, params)
 
 
 # SELECT文発行
 def select(sql_str, params=None):
 
-    logging.info('Sql statement: {}'.format(sql_str))
-    logging.info('params: {}'.format(params))
+    logging.debug('Sql statement: {}'.format(sql_str))
+    logging.debug('params: {}'.format(params))
 
     with closing(sqlite3.connect(consts.DATABASE)) as conn:
         cur = conn.cursor()
@@ -111,8 +154,8 @@ def select(sql_str, params=None):
 # INSERT文発行
 def insert(sql_str, params=None):
 
-    logging.info('Sql statement: {}'.format(sql_str))
-    logging.info('params: {}'.format(params))
+    logging.debug('Sql statement: {}'.format(sql_str))
+    logging.debug('params: {}'.format(params))
 
     with closing(sqlite3.connect(consts.DATABASE)) as conn:
         cur = conn.cursor()
